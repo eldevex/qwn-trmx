@@ -11,6 +11,10 @@
 [![License](https://img.shields.io/badge/License-MIT-blue?style=flat-square)](LICENSE)
 [![Platform](https://img.shields.io/badge/Platform-Android-3DDC84?style=flat-square&logo=android&logoColor=white)](#)
 
+### 📖 [**Открыть веб-инструкцию →**](https://eldevex.github.io/qwn-trmx/)
+
+Красивая пошаговая инструкция с примерами, скриншотами и FAQ — то же самое, что в этом README, но удобнее для чтения с телефона.
+
 </div>
 
 ---
@@ -46,6 +50,8 @@
 ---
 
 ## 🚀 Установка
+
+> 💡 **Совет:** если предпочитаете читать с телефона — откройте [веб-инструкцию](https://eldevex.github.io/qwn-trmx/) — там то же самое, но с более удобной вёрсткой.
 
 ### Способ 1: Bash-скрипт (быстрый)
 
@@ -285,7 +291,7 @@ DEFAULT_MAX_TOKENS=65536 ./start-qwen.sh
 <details>
 <summary><b>Расширение не устанавливается в браузер</b></summary>
 
-- Убедитесь, что используете Chromium-браузер с поддержкой расширений (**Kiwi** или **Titanium**) — в обычном Chrome на Android расширения не поддерживаются.
+- Убедитесь, что используете Chromium-браузер с поддержкой расширений (**Kiwi Browser** или **Titanium Browser**) — в обычном Chrome на Android расширения не поддерживаются.
 - Включите **Режим разработчика** в настройках расширений.
 - При «Load unpacked» выбирайте папку `extension/`, а не файл внутри неё.
 </details>
@@ -352,6 +358,8 @@ MIT — используйте, модифицируйте, распростра
 ---
 
 <div align="center">
+
+### 📖 [**Открыть веб-инструкцию →**](https://eldevex.github.io/qwn-trmx/)
 
 **Сделано для личного использования. Используйте ответственно.**
 
