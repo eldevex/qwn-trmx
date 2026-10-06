@@ -40,7 +40,7 @@
 | **Устройство** | Android 8+ |
 | **Терминал** | [Termux из F-Droid](https://f-droid.org/packages/com.termux/) (не из Google Play!) |
 | **Node.js** | 18+ (устанавливается автоматически) |
-| **Браузер** | [Kiwi Browser](https://play.google.com/store/apps/details?id=com.kiwibrowser.browser) или [Titanium Browser](https://github.com/jqssun/android-titanium-browser) — оба поддерживают расширения Chrome и Manifest V2 |
+| **Браузер** | Любой Chromium-браузер с поддержкой расширений: [Kiwi Browser](https://play.google.com/store/apps/details?id=com.kiwibrowser.browser) или [Titanium Browser](https://github.com/jqssun/android-titanium-browser) |
 | **Аккаунт** | Qwen (одноразовый, не основной) |
 
 ---
@@ -285,7 +285,7 @@ DEFAULT_MAX_TOKENS=65536 ./start-qwen.sh
 <details>
 <summary><b>Расширение не устанавливается в браузер</b></summary>
 
-- Используйте **Kiwi Browser** или **Titanium Browser** — в обычном Chrome на Android расширения не работают.
+- Убедитесь, что используете Chromium-браузер с поддержкой расширений (**Kiwi** или **Titanium**) — в обычном Chrome на Android расширения не поддерживаются.
 - Включите **Режим разработчика** в настройках расширений.
 - При «Load unpacked» выбирайте папку `extension/`, а не файл внутри неё.
 </details>
@@ -336,7 +336,6 @@ qwn-trmx/
 - `refresh_token` живёт ~30 дней. После — нужен новый дамп.
 - `bx-ua` / `bx-umidtoken` не обновляются автоматически — берутся из дампа.
 - Прокси не запускается после перезагрузки телефона — нужно запускать вручную.
-- Расширение работает только в браузерах с поддержкой **Manifest V2** (Kiwi, Titanium).
 
 ---
 
