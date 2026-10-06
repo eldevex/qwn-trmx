@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, 'Segoe UI', Roboto, sans-serif; }
+  body { width: 500px; padding: 14px; background: #14161c; color: #e0e0e0; font-size: 13px; }
+  h1 { font-size: 15px; color: #4fc3f7; margin-bottom: 4px; }
+  .sub { font-size: 11px; color: #888; margin-bottom: 10px; }
+  .status { padding: 8px 10px; border-radius: 6px; margin-bottom: 10px; font-size: 12px; }
+  .ok { background:#1b5e2033; border:1px solid #2e7d32; color:#66bb6a; }
+  .warn { background:#e6510033; border:1px solid #e65100; color:#ff9800; }
+  .stats { font-size: 11px; color: #aaa; margin-bottom: 8px; line-height: 1.8; }
+  .stats b { color: #7ee787; }
+  .btn-row { display:flex; gap:6px; margin-bottom:10px; }
+  button { flex:1; padding:8px; border:none; border-radius:6px; cursor:pointer; font-size:12px; font-weight:600; }
+  .b1 { background:#1565c0; color:#fff; }
+  .b2 { background:#2e7d32; color:#fff; }
+  .b3 { background:#e65100; color:#fff; }
+  .b4 { background:#424242; color:#fff; }
+  pre { background:#0b0d12; border:1px solid #2a2f3a; border-radius:4px; padding:10px;
+        font:10px 'Courier New', monospace; color:#7ee787; white-space:pre-wrap;
+        word-break:break-all; max-height:320px; overflow:auto; }
+  .hint { font-size:10px; color:#666; text-align:center; margin-top:8px; }
+</style>
+</head>
+<body>
+  <h1>🔬 Qwen Full Dumper</h1>
+  <div class="sub">cookies + localStorage + sessionStorage + сетевые запросы</div>
+  <div id="status" class="status warn">⏳ Загрузка...</div>
+  <div id="stats" class="stats"></div>
+  <div class="btn-row">
+    <button id="btnRefresh" class="b1">🔄 Обновить</button>
+    <button id="btnClear" class="b4">🧹 Очистить лог</button>
+    <button id="btnCopy" class="b2">📋 Копировать</button>
+    <button id="btnSave" class="b3">💾 Скачать</button>
+  </div>
+  <pre id="preview">{ }</pre>
+  <div class="hint">Открой chat.qwen.ai → F5 → отправь сообщение → открой popup</div>
+<script src="popup.js"></script>
+</body>
+</html>

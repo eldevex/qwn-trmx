@@ -1,0 +1,27 @@
+{
+  "manifest_version": 3,
+  "name": "Qwen Full Dumper",
+  "version": "1.0",
+  "description": "Полный дамп cookies, storage и запросов с chat.qwen.ai",
+  "permissions": ["cookies", "storage", "unlimitedStorage"],
+  "host_permissions": [
+    "https://chat.qwen.ai/*",
+    "https://*.qwen.ai/*",
+    "https://*.aliyun.com/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": ["https://chat.qwen.ai/*"],
+      "js": ["injector.js"],
+      "run_at": "document_start",
+      "world": "MAIN"
+    },
+    {
+      "matches": ["https://chat.qwen.ai/*"],
+      "js": ["content.js"],
+      "run_at": "document_start",
+      "world": "ISOLATED"
+    }
+  ],
+  "action": { "default_popup": "popup.html" }
+}
