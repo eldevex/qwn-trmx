@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Qwen API Proxy — инструкция</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --bg-alt: #161923;
+    --border: #232634;
+    --text: #e4e6eb;
+    --text-dim: #9aa0ac;
+    --accent: #6c8cff;
+    --accent-hover: #5a7aff;
+    --green: #4ade80;
+    --red: #f87171;
+    --yellow: #fbbf24;
+    --code-bg: #1a1d28;
+    --radius: 10px;
+    --font-mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+    --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-sans);
+    font-size: 16px;
+    line-height: 1.65;
+    padding: 24px 16px 80px;
+    max-width: 820px;
+    margin: 0 auto;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { color: var(--accent-hover); text-decoration: underline; }
+
+  h1 {
+    font-size: 1.9rem;
+    font-weight: 700;
+    margin-bottom: 6px;
+    letter-spacing: -0.02em;
+  }
+
+  .subtitle {
+    color: var(--text-dim);
+    font-size: 0.95rem;
+    margin-bottom: 28px;
+  }
+
+  h2 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 36px 0 14px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+    letter-spacing: -0.01em;
+  }
+
+  h3 {
+    font-size: 1.05rem;
+    font-weight: 600;
+    margin: 24px 0 10px;
+  }
+
+  p { margin-bottom: 12px; }
+
+  ul, ol { margin: 0 0 14px 22px; }
+  li { margin-bottom: 6px; }
+
+  /* ====== Callouts ====== */
+  .callout {
+    border-left: 3px solid var(--yellow);
+    background: rgba(251, 191, 36, 0.07);
+    padding: 14px 18px;
+    border-radius: 0 var(--radius) var(--radius) 0;
+    margin: 16px 0;
+    font-size: 0.92rem;
+  }
+  .callout.danger { border-color: var(--red); background: rgba(248, 113, 113, 0.07); }
+  .callout.info { border-color: var(--accent); background: rgba(108, 140, 255, 0.07); }
+  .callout.success { border-color: var(--green); background: rgba(74, 222, 128, 0.07); }
+  .callout strong { color: #fff; }
+
+  /* ====== Spoilers ====== */
+  details {
+    background: var(--bg-alt);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin: 12px 0;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+  details[open] { border-color: #2e3344; }
+
+  summary {
+    padding: 14px 18px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.98rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    list-style: none;
+    user-select: none;
+    transition: background 0.15s;
+  }
+  summary::-webkit-details-marker { display: none; }
+  summary::before {
+    content: '▶';
+    font-size: 0.7rem;
+    color: var(--text-dim);
+    transition: transform 0.2s;
+    display: inline-block;
+    width: 14px;
+  }
+  details[open] summary::before { transform: rotate(90deg); }
+  summary:hover { background: rgba(108, 140, 255, 0.06); }
+
+  .details-body {
+    padding: 4px 18px 18px 42px;
+    font-size: 0.95rem;
+  }
+
+  /* ====== Code ====== */
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    overflow-x: auto;
+    font-family: var(--font-mono);
+    font-size: 0.84rem;
+    line-height: 1.55;
+    position: relative;
+    margin: 12px 0;
+    color: #d4d8e0;
+  }
+  code {
+    font-family: var(--font-mono);
+    font-size: 0.84rem;
+    background: rgba(108, 140, 255, 0.1);
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: #b8c4ff;
+  }
+  pre code { background: none; padding: 0; color: inherit; }
+
+  .copy-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: var(--border);
+    color: var(--text-dim);
+    border: none;
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-size: 0.75rem;
+    cursor: pointer;
+    font-family: var(--font-sans);
+    opacity: 0;
+    transition: opacity 0.2s, background 0.15s;
+  }
+  pre:hover .copy-btn { opacity: 1; }
+  .copy-btn:hover { background: #2e3344; color: #fff; }
+  .copy-btn.copied { background: var(--green); color: #0f1117; }
+
+  /* ====== Tabs ====== */
+  .tabs {
+    display: flex;
+    gap: 4px;
+    margin: 16px 0 0;
+    background: var(--bg-alt);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 4px;
+  }
+  .tab-btn {
+    flex: 1;
+    padding: 10px 14px;
+    background: transparent;
+    border: none;
+    border-radius: 7px;
+    color: var(--text-dim);
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: var(--font-sans);
+    transition: all 0.15s;
+    text-align: center;
+  }
+  .tab-btn:hover { color: var(--text); }
+  .tab-btn.active { background: var(--accent); color: #fff; font-weight: 600; }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* ====== Badges ====== */
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+  }
+  .badge.green { background: rgba(74, 222, 128, 0.15); color: var(--green); }
+  .badge.red { background: rgba(248, 113, 113, 0.15); color: var(--red); }
+  .badge.blue { background: rgba(108, 140, 255, 0.15); color: var(--accent); }
+  .badge.yellow { background: rgba(251, 191, 36, 0.15); color: var(--yellow); }
+
+  hr {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 32px 0;
+  }
+
+  .footer {
+    margin-top: 48px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+    color: var(--text-dim);
+    font-size: 0.85rem;
+    text-align: center;
+  }
+
+  @media (max-width: 600px) {
+    body { padding: 16px 12px 60px; font-size: 15px; }
+    h1 { font-size: 1.5rem; }
+    .details-body { padding-left: 18px; }
+    .tab-btn { font-size: 0.82rem; padding: 9px 8px; }
+  }
+</style>
+</head>
+<body>
+
+<h1>Qwen API Proxy</h1>
+<p class="subtitle">OpenAI-совместимый API для Qwen Web Chat · Termux · автообновление токена</p>
+
+<div class="callout danger">
+  <strong>⚠️ Используйте на свой страх и риск.</strong> Проект работает через недокументированный web-API Qwen. Это может нарушать условия использования и привести к блокировке аккаунта. Автор не несёт ответственности за заблокированные аккаунты, неверные ответы модели или любые другие последствия. Используйте одноразовый аккаунт, который не жалко потерять.
+</div>
+
+<details>
+  <summary>📋 Что это даёт</summary>
+  <div class="details-body">
+    <ul>
+      <li>Локальный сервер на <code>127.0.0.1:5000</code>, совместимый с OpenAI API.</li>
+      <li>Подключается к <code>chat.qwen.ai</code> через вашу браузерную сессию.</li>
+      <li>Работает с Kai 9000, Open WebUI, Chatbox, SillyTavern, OpenAI SDK и любыми другими клиентами.</li>
+      <li>Поддерживает обычные запросы и <strong>SSE-стриминг</strong>.</li>
+      <li>Автоматически обновляет access-токен (каждые 10 минут + за 5 минут до истечения).</li>
+      <li>Сам подхватывает новый <code>refresh_token</code> после ротации.</li>
+    </ul>
+    <p><strong>Модели:</strong> <code>qwen3.8-max</code>, <code>qwen3.7-max</code>, <code>qwen3.7-plus</code>, <code>qwen3.6-plus</code>, <code>qwen3.5-plus</code>.</p>
+  </div>
+</details>
+
+<h2>📦 Что подготовить заранее</h2>
+
+<p>Прежде чем запускать прокси, нужно подготовить три вещи: браузер, расширение для снятия дампа и Termux.</p>
+
+<details>
+  <summary>🌐 Шаг 1. Браузер с поддержкой расширений</summary>
+  <div class="details-body">
+    <p>Для работы расширения Qwen Full Dumper нужен Chromium-браузер с поддержкой расширений Chrome. Обычный Chrome на Android их не поддерживает — расширения там просто отключены. Используйте один из этих:</p>
+
+    <h3>🥝 Kiwi Browser</h3>
+    <ul>
+      <li>Полная поддержка расширений Chrome.</li>
+      <li>Скачать: <a href="https://play.google.com/store/apps/details?id=com.kiwibrowser.browser" target="_blank" rel="noopener">Google Play</a> · <a href="https://github.com/kiwibrowser/src.next/releases" target="_blank" rel="noopener">GitHub Releases</a></li>
+      <li>Обновляется нечасто, но стабильно работает с нужными расширениями.</li>
+    </ul>
+
+    <h3>🪶 Titanium Browser</h3>
+    <ul>
+      <li>Современная альтернатива Kiwi — свежее ядро Chromium, тоже поддерживает расширения Chrome.</li>
+      <li>Скачать: <a href="https://github.com/jqssun/android-titanium-browser" target="_blank" rel="noopener">github.com/jqssun/android-titanium-browser</a></li>
+      <li>Рекомендуется, если Kiwi не устанавливается или устарел.</li>
+    </ul>
+
+    <div class="callout info">
+      <strong>Почему не Firefox?</strong> В Firefox на Android расширения поддерживаются, но Qwen Full Dumper написан под Chromium API. На Firefox работать не будет.
+    </div>
+  </div>
+</details>
+
+<details>
+  <summary>🧩 Шаг 2. Установка расширения Qwen Full Dumper</summary>
+  <div class="details-body">
+    <p>Расширение лежит прямо в репозитории проекта — скачивать отдельно ничего не нужно.</p>
+
+    <h3>Способ A: установка из репозитория (рекомендуется)</h3>
+    <ol>
+      <li>Откройте репозиторий: <a href="https://github.com/eldevex/qwn-trmx" target="_blank" rel="noopener">github.com/eldevex/qwn-trmx</a>.</li>
+      <li>Скачайте папку <code>extension/</code> целиком (или <code>extension.zip</code>, если он есть в релизах).</li>
+      <li>Распакуйте архив, если скачали zip — должна получиться папка с файлами <code>manifest.json</code>, <code>background.js</code>, <code>content.js</code> и т.д.</li>
+      <li>Откройте Kiwi или Titanium Browser.</li>
+      <li>Перейдите в меню браузера и включите <strong>Developer mode / Режим разработчика</strong> в разделе <em>Extensions</em>.</li>
+      <li>Нажмите <strong>Load unpacked / Загрузить распакованное</strong> и выберите папку <code>extension/</code>.</li>
+      <li>Расширение появится в списке — можно закреплять иконку на панели.</li>
+    </ol>
+
+    <h3>Способ B: установка CRX-файла (если есть в релизах)</h3>
+    <ol>
+      <li>Скачайте <code>qwen-full-dumper.crx</code> из раздела <strong>Releases</strong> репозитория.</li>
+      <li>В Kiwi / Titanium откройте <code>chrome://extensions</code>.</li>
+      <li>Включите режим разработчика и перетащите <code>.crx</code> в окно расширений.</li>
+      <li>Подтвердите установку.</li>
+    </ol>
+
+    <div class="callout">
+      <strong>Структура репозитория:</strong>
+      <pre><code>qwn-trmx/
+├── extension/           ← расширение для снятия дампа
+│   ├── manifest.json
+│   ├── background.js
+│   ├── content.js
+│   └── icons/
+├── qwen-proxy.js        ← сам прокси
+├── extract-qwen-auth.js ← парсер дампа
+├── start-qwen.sh
+├── update-auth.sh
+└── README.md</code></pre>
+    </div>
+  </div>
+</details>
+
+<details>
+  <summary>📱 Шаг 3. Termux и Node.js</summary>
+  <div class="details-body">
+    <p>Установите Termux из <a href="https://f-droid.org/packages/com.termux/" target="_blank" rel="noopener">F-Droid</a> (версия из Google Play устарела и не работает корректно). Node.js поставится автоматически при запуске скрипта установки, отдельно ничего делать не нужно.</p>
+    <pre><code>pkg update -y && pkg install -y nodejs git</code></pre>
+    <p>После этого — переходите к «Быстрому старту».</p>
+  </div>
+</details>
+
+<h2>🚀 Быстрый старт</h2>
+
+<p>Выберите способ установки:</p>
+
+<div class="tabs">
+  <button class="tab-btn active" data-tab="tab-script">⚡ Bash-скрипт</button>
+  <button class="tab-btn" data-tab="tab-github">🐙 GitHub</button>
+</div>
+
+<div id="tab-script" class="tab-panel active">
+  <div class="callout info">
+    <strong>Самый быстрый способ.</strong> Скопируйте весь блок ниже и вставьте в Termux — одной командой создастся папка <code>~/qwen-proxy</code> со всеми файлами.
+  </div>
+  <pre><code>bash <(cat <<'SETUP_ALL'
+#!/data/data/com.termux/files/usr/bin/bash
+set -e
+PROJECT_DIR="$HOME/qwen-proxy"
+mkdir -p "$PROJECT_DIR"
+cd "$PROJECT_DIR"
+
+if ! command -v node >/dev/null 2>&1; then
+  echo "📦 Устанавливаю Node.js..."
+  pkg update -y && pkg install -y nodejs
+fi
+echo "✅ Node: $(node -v)"
+
+# ... (полный скрипт из предыдущего сообщения) ...
+SETUP_ALL
+)</code></pre>
+  <p>После создания проекта:</p>
+  <ol>
+    <li>Сделайте дамп auth через Qwen Full Dumper в браузере.</li>
+    <li>Положите дамп в <code>~/qwen-proxy</code>.</li>
+    <li>Выполните:</li>
+  </ol>
+  <pre><code>cd ~/qwen-proxy
+cp ~/storage/downloads/qwen-dump-XXXX.json .
+./update-auth.sh qwen-dump-XXXX.json
+./start-qwen.sh</code></pre>
+</div>
+
+<div id="tab-github" class="tab-panel">
+  <div class="callout info">
+    <strong>Классический способ.</strong> Клонируйте репозиторий и запустите вручную. Удобно, если хотите обновлять код через <code>git pull</code>. Расширение для снятия дампа уже лежит в папке <code>extension/</code> этого репозитория.
+  </div>
+  <pre><code>cd ~
+git clone https://github.com/eldevex/qwn-trmx.git
+cd qwn-trmx
+npm install
+node qwen-proxy.js</code></pre>
+  <p>После клонирования папка <code>extension/</code> уже будет на месте — устанавливайте её в Kiwi / Titanium как описано выше.</p>
+</div>
+
+<h2>🔐 Настройка Kai 9000</h2>
+
+<details>
+  <summary>📱 Пошаговая инструкция</summary>
+  <div class="details-body">
+    <ol>
+      <li>Откройте Kai 9000 → <strong>Настройки → Сервисы</strong>.</li>
+      <li>Выберите <strong>OpenAI-Compatible API</strong>.</li>
+      <li>В поле <strong>URL сервера</strong> введите:
+        <pre><code>http://127.0.0.1:5000/v1</code></pre>
+      </li>
+      <li>В поле <strong>API Key</strong> введите любой текст, например <code>sk-qwen</code> — прокси его не проверяет.</li>
+      <li>Выберите модель:
+        <ul>
+          <li><strong>Qwen 3.7 Plus</strong> — лучший баланс, стабильнее всего.</li>
+          <li><strong>Qwen3.7 Max</strong> / <strong>Qwen3.8 Max</strong> — для сложных задач, работает с <code>max_tokens=32768</code>.</li>
+          <li><strong>Qwen 3.6 Plus</strong> / <strong>Qwen3.5 Plus</strong> — тоже ок.</li>
+        </ul>
+      </li>
+      <li>Нажмите «Сохранить» и отправьте тестовое сообщение.</li>
+    </ol>
+    <p>Если модели не загружаются — проверьте <code>curl http://localhost:5000/v1/models</code> в Termux.</p>
+  </div>
+</details>
+
+<h2>🛠 Управление прокси</h2>
+
+<details>
+  <summary>▶️ Запуск / остановка / логи</summary>
+  <div class="details-body">
+    <pre><code># Запустить прокси
+cd ~/qwen-proxy && ./start-qwen.sh
+
+# Остановить
+pkill -f qwen-proxy.js
+
+# Смотреть лог в реальном времени
+tail -f ~/qwen-proxy/proxy.log
+
+# Проверить состояние
+curl -s http://localhost:5000/v1/health | python3 -m json.tool
+
+# Обновить токен вручную
+curl -X POST http://localhost:5000/v1/refresh
+
+# Проверить, что процесс жив
+ps aux | grep qwen-proxy</code></pre>
+    <p><strong>Важно:</strong> после перезагрузки телефона прокси не запускается сам — нужно снова выполнить <code>./start-qwen.sh</code>.</p>
+  </div>
+</details>
+
+<details>
+  <summary>🔄 Обновление токена (раз в ~30 дней)</summary>
+  <div class="details-body">
+    <p>Когда <code>refresh_token</code> истечёт или будет отозван, в логе появится:</p>
+    <pre><code>[auth] refresh HTTP 200 body: {"success":false,"data":{"code":"Unauthorized","details":"Токен отозван. Пожалуйста, войдите снова."}}</code></pre>
+    <p>Что делать:</p>
+    <ol>
+      <li>Откройте <code>chat.qwen.ai</code> в Kiwi / Titanium и <strong>залогиньтесь заново</strong>.</li>
+      <li>Снимите свежий дамп через установленное расширение.</li>
+      <li>Скопируйте дамп в <code>~/qwen-proxy</code> и выполните:
+        <pre><code>cd ~/qwen-proxy
+cp ~/storage/downloads/qwen-dump-XXXX.json .
+chmod 644 qwen-dump-XXXX.json
+./update-auth.sh qwen-dump-XXXX.json</code></pre>
+      </li>
+      <li>Прокси подхватит новый токен <strong>автоматически</strong> через <code>fs.watch</code>. Перезапуск не нужен.</li>
+    </ol>
+    <p>Проверка: <code>curl -s http://localhost:5000/v1/health | python3 -m json.tool</code> — должно быть <code>token_expired: false</code> и <code>token_seconds_left</code> ~900.</p>
+  </div>
+</details>
+
+<details>
+  <summary>⚙️ Настройки (переменные окружения)</summary>
+  <div class="details-body">
+    <p>Можно менять при запуске:</p>
+    <pre><code>REFRESH_INTERVAL_MS=600000 \
+REFRESH_AHEAD_SEC=300 \
+DEFAULT_MAX_TOKENS=32768 \
+  nohup node qwen-proxy.js > proxy.log 2>&1 &</code></pre>
+    <ul>
+      <li><code>REFRESH_INTERVAL_MS</code> — как часто обновлять токен (по умолчанию 10 мин).</li>
+      <li><code>REFRESH_AHEAD_SEC</code> — за сколько секунд до истечения обновлять (по умолчанию 300).</li>
+      <li><code>DEFAULT_MAX_TOKENS</code> — лимит вывода, если клиент не передал свой (по умолчанию 32768).</li>
+      <li><code>HOST</code> — по умолчанию <code>127.0.0.1</code>. Поставьте <code>0.0.0.0</code>, если нужно подключаться с другого устройства.</li>
+    </ul>
+  </div>
+</details>
+
+<h2>❓ Частые проблемы</h2>
+
+<details>
+  <summary>🔴 Прокси отвечает пустотой (<code>content: ""</code>)</summary>
+  <div class="details-body">
+    <p><strong>Причина:</strong> у reasoning-моделей (Max) think-блок съедает весь лимит, и ответ обрезается.</p>
+    <p><strong>Решение:</strong> поднять <code>DEFAULT_MAX_TOKENS</code> или использовать <code>Qwen 3.7 Plus</code>.</p>
+    <pre><code>DEFAULT_MAX_TOKENS=65536 ./start-qwen.sh</code></pre>
+  </div>
+</details>
+
+<details>
+  <summary>🔴 <code>Bad_Request: Invalid input too many messages</code></summary>
+  <div class="details-body">
+    <p><strong>Причина:</strong> Qwen не принимает массив из нескольких сообщений. История должна быть вложена в одно сообщение.</p>
+    <p><strong>Решение:</strong> убедиться, что в <code>qwen-proxy.js</code> есть функция <code>flattenMessages</code> и она вызывается в начале <code>qwenChat</code>. В v7 она уже встроена.</p>
+  </div>
+</details>
+
+<details>
+  <summary>🔴 <code>Bad_Request: Missing origin</code> при refresh</summary>
+  <div class="details-body">
+    <p><strong>Причина:</strong> в заголовках refresh-запроса нет <code>origin</code>.</p>
+    <p><strong>Решение:</strong> в <code>buildRefreshHeaders()</code> должны быть:</p>
+    <pre><code>'origin': 'https://chat.qwen.ai',
+'referer': 'https://chat.qwen.ai/',
+'x-request-origin': 'https://chat.qwen.ai',</code></pre>
+  </div>
+</details>
+
+<details>
+  <summary>🔴 <code>refresh failed</code> постоянно, токен не обновляется</summary>
+  <div class="details-body">
+    <p><strong>Причина:</strong> <code>refresh_token</code> отозван или истёк (~30 дней).</p>
+    <p><strong>Решение:</strong> новый дамп → <code>./update-auth.sh новый.json</code>. После этого <code>fs.watch</code> подхватит токен автоматически.</p>
+  </div>
+</details>
+
+<details>
+  <summary>🔴 Расширение не устанавливается в браузер</summary>
+  <div class="details-body">
+    <ul>
+      <li>Убедитесь, что используете Chromium-браузер с поддержкой расширений (<strong>Kiwi Browser</strong> или <strong>Titanium Browser</strong>) — в обычном Chrome на Android расширения не поддерживаются.</li>
+      <li>Проверьте, что включён <strong>Режим разработчика</strong> на странице расширений.</li>
+      <li>Если ставите через «Load unpacked» — выбирайте именно папку <code>extension/</code>, а не отдельный файл внутри.</li>
+    </ul>
+  </div>
+</details>
+
+<details>
+  <summary>🔴 Kai не подключается, запросы не доходят</summary>
+  <div class="details-body">
+    <ol>
+      <li>Проверьте, что прокси жив: <code>ps aux | grep qwen-proxy</code>.</li>
+      <li>Проверьте health: <code>curl -s http://127.0.0.1:5000/v1/health</code>.</li>
+      <li>Проверьте URL в Kai: <code>http://127.0.0.1:5000/v1</code> (не <code>https</code>).</li>
+      <li>Посмотрите лог: <code>tail -n 30 ~/qwen-proxy/proxy.log</code> — если пусто, запрос до прокси не дошёл.</li>
+    </ol>
+  </div>
+</details>
+
+<h2>⚠️ Ограничения</h2>
+
+<details>
+  <summary>📌 Что нужно знать</summary>
+  <div class="details-body">
+    <ul>
+      <li>История диалога каждый раз вкладывается в одно сообщение — расходует больше токенов, чем «нативный» чат.</li>
+      <li><code>refresh_token</code> живёт ~30 дней. После этого нужен новый дамп.</li>
+      <li><code>bx-ua</code> / <code>bx-umidtoken</code> не обновляются автоматически — берутся из дампа.</li>
+      <li>Прокси не запускается после перезагрузки телефона — нужно запускать вручную.</li>
+      <li>Termux может быть убит Android'ом в фоне — дайте ему разрешение «Автозапуск» и отключите оптимизацию батареи.</li>
+      <li>Kiwi / Titanium браузеры не всегда вовремя обновляют ядро Chromium — если расширение перестанет работать, попробуйте другой браузер из списка.</li>
+    </ul>
+  </div>
+</details>
+
+<hr>
+
+<div class="footer">
+  Qwen API Proxy · Termux · Node.js<br>
+  Сделано для личного использования. Используйте ответственно.
+</div>
+
+<script>
+  // Tabs
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById(btn.dataset.tab).classList.add('active');
+    });
+  });
+
+  // Copy buttons
+  document.querySelectorAll('pre').forEach(pre => {
+    const btn = document.createElement('button');
+    btn.className = 'copy-btn';
+    btn.textContent = 'копировать';
+    btn.addEventListener('click', () => {
+      const code = pre.querySelector('code') || pre;
+      navigator.clipboard.writeText(code.textContent).then(() => {
+        btn.textContent = '✅ готово';
+        btn.classList.add('copied');
+        setTimeout(() => {
+          btn.textContent = 'копировать';
+          btn.classList.remove('copied');
+        }, 1500);
+      });
+    });
+    pre.appendChild(btn);
+  });
+</script>
+
+</body>
+</html>
